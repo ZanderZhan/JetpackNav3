@@ -13,11 +13,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.jetpacknav3.screen.Edit
+import com.example.jetpacknav3.screen.EditScreen
+import com.example.jetpacknav3.screen.Profile
+import com.example.jetpacknav3.screen.ProfileScreen
 import com.example.jetpacknav3.ui.theme.JetpackNav3Theme
+import com.example.jetpacknav3.viewmodel.ProfileViewModel
 import kotlinx.serialization.Serializable
 
 
@@ -33,6 +41,10 @@ class MainActivity : ComponentActivity() {
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
                         backStack = backStack,
+                        entryDecorators = listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator()
+                        ),
                         entryProvider = entryProvider {
                             entry<Home> {
                                 Greeting(name = "Android", onClick = {
@@ -40,9 +52,18 @@ class MainActivity : ComponentActivity() {
                                 })
                             }
                             entry<Profile> {
-                                Profile(onBack = {
-                                    backStack.removeLastOrNull()
-                                })
+                                val viewModel: ProfileViewModel = viewModel()
+                                ProfileScreen(
+                                    onClickNext = {
+                                        backStack.add(Edit)
+                                    },
+                                    onBack = {
+                                        backStack.removeLastOrNull()
+                                    },
+                                    viewModel = viewModel)
+                            }
+                            entry<Edit> {
+                                EditScreen()
                             }
                         }
                     )
@@ -74,23 +95,4 @@ fun GreetingPreview() {
     JetpackNav3Theme {
         Greeting("Android")
     }
-}
-
-
-@Serializable
-data object Profile : NavKey
-
-@Composable
-fun Profile(onBack: () -> Unit = {}, modifier: Modifier = Modifier) {
-    return Column {
-        Text(
-            text = "Profile",
-            modifier = modifier
-        )
-        Button(onClick = onBack) {
-            Text(text = "Go Back")
-        }
-    }
-
-
 }
