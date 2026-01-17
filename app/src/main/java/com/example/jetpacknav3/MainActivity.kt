@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
                                 })
                             }
                             entry<Profile> {
-                                Profile()
+                                Profile(onBack = {
+                                    backStack.removeLastOrNull()
+                                })
                             }
                         }
                     )
@@ -79,9 +81,16 @@ fun GreetingPreview() {
 data object Profile : NavKey
 
 @Composable
-fun Profile(modifier: Modifier = Modifier) {
-    Text(
-        text = "Profile",
-        modifier = modifier
-    )
+fun Profile(onBack: () -> Unit = {}, modifier: Modifier = Modifier) {
+    return Column {
+        Text(
+            text = "Profile",
+            modifier = modifier
+        )
+        Button(onClick = onBack) {
+            Text(text = "Go Back")
+        }
+    }
+
+
 }
