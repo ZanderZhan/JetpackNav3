@@ -4,14 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.example.jetpacknav3.ui.theme.JetpackNav3Theme
+import kotlinx.serialization.Serializable
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,9 +28,21 @@ class MainActivity : ComponentActivity() {
         setContent {
             JetpackNav3Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                    val backStack = rememberNavBackStack(Home)
+
+                    NavDisplay(
+                        modifier = Modifier.padding(innerPadding),
+                        backStack = backStack,
+                        entryProvider = entryProvider {
+                            entry<Home> {
+                                Greeting(name = "Android", onClick = {
+                                    backStack.add(Profile)
+                                })
+                            }
+                            entry<Profile> {
+                                Profile()
+                            }
+                        }
                     )
                 }
             }
@@ -30,12 +50,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+@Serializable
+data object Home : NavKey
+
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Greeting(name: String, onClick: () -> Unit = {}, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = "Hello $name!",
+        )
+        Button(onClick = onClick) {
+            Text(text = "Go To Profile")
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -44,4 +72,16 @@ fun GreetingPreview() {
     JetpackNav3Theme {
         Greeting("Android")
     }
+}
+
+
+@Serializable
+data object Profile : NavKey
+
+@Composable
+fun Profile(modifier: Modifier = Modifier) {
+    Text(
+        text = "Profile",
+        modifier = modifier
+    )
 }
