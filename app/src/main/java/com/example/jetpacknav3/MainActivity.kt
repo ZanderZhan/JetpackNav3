@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,6 +21,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.jetpacknav3.scene.FlowerDetail
+import com.example.jetpacknav3.scene.FlowerDetailScreen
+import com.example.jetpacknav3.scene.FlowerList
+import com.example.jetpacknav3.scene.FlowerListScreen
+import com.example.jetpacknav3.scene.ListDetailScene
+import com.example.jetpacknav3.scene.ListDetailSceneStrategy
 import com.example.jetpacknav3.screen.Edit
 import com.example.jetpacknav3.screen.EditScreen
 import com.example.jetpacknav3.screen.Profile
@@ -38,9 +45,12 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val backStack = rememberNavBackStack(Home)
 
+                    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
                         backStack = backStack,
+                        sceneStrategy = ListDetailSceneStrategy(windowSizeClass),
                         entryDecorators = listOf(
                             rememberSaveableStateHolderNavEntryDecorator(),
                             rememberViewModelStoreNavEntryDecorator()
@@ -49,6 +59,8 @@ class MainActivity : ComponentActivity() {
                             entry<Home> {
                                 Greeting(name = "Android", onClick = {
                                     backStack.add(Profile)
+                                }, onGotoFlowerList = {
+                                    backStack.add(FlowerList)
                                 })
                             }
                             entry<Profile> {
@@ -65,6 +77,23 @@ class MainActivity : ComponentActivity() {
                             entry<Edit> {
                                 EditScreen()
                             }
+                            entry<FlowerList>(
+                                metadata = ListDetailSceneStrategy.ListDetail
+                            ) { navKey ->
+                                FlowerListScreen(navKey, onItemClick = { flower ->
+                                    if (backStack.lastOrNull() is FlowerDetail) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                    // Handle item click here
+                                    val detail = navKey.flowers.first { it.name == flower }
+                                    backStack.add(FlowerDetail(detail))
+                                })
+                            }
+                            entry<FlowerDetail>(
+                                metadata = ListDetailSceneStrategy.ListDetail
+                            ) { detail ->
+                                FlowerDetailScreen(detail.flower)
+                            }
                         }
                     )
                 }
@@ -78,13 +107,16 @@ class MainActivity : ComponentActivity() {
 data object Home : NavKey
 
 @Composable
-fun Greeting(name: String, onClick: () -> Unit = {}, modifier: Modifier = Modifier) {
+fun Greeting(name: String, onClick: () -> Unit = {}, onGotoFlowerList: () -> Unit = {}, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = "Hello $name!",
         )
         Button(onClick = onClick) {
             Text(text = "Go To Profile")
+        }
+        Button(onClick = onGotoFlowerList) {
+            Text(text = "Go To Flower List")
         }
     }
 }
