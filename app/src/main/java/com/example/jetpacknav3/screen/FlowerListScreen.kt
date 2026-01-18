@@ -1,4 +1,4 @@
-package com.example.jetpacknav3.scene
+package com.example.jetpacknav3.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn

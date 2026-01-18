@@ -1,4 +1,4 @@
-package com.example.jetpacknav3.scene
+package com.example.jetpacknav3.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

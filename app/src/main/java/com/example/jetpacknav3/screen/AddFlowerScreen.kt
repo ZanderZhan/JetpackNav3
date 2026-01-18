@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
-import com.example.jetpacknav3.scene.Flower
 import kotlinx.serialization.Serializable
 
 @Serializable
