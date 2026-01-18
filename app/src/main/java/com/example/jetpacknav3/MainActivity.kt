@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -27,6 +29,9 @@ import com.example.jetpacknav3.scene.FlowerList
 import com.example.jetpacknav3.scene.FlowerListScreen
 import com.example.jetpacknav3.scene.ListDetailScene
 import com.example.jetpacknav3.scene.ListDetailSceneStrategy
+import com.example.jetpacknav3.scene.flowers
+import com.example.jetpacknav3.screen.AddFlower
+import com.example.jetpacknav3.screen.AddFlowerScreen
 import com.example.jetpacknav3.screen.Edit
 import com.example.jetpacknav3.screen.EditScreen
 import com.example.jetpacknav3.screen.Profile
@@ -37,6 +42,7 @@ import kotlinx.serialization.Serializable
 
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -80,19 +86,32 @@ class MainActivity : ComponentActivity() {
                             entry<FlowerList>(
                                 metadata = ListDetailSceneStrategy.ListDetail
                             ) { navKey ->
-                                FlowerListScreen(navKey, onItemClick = { flower ->
+                                FlowerListScreen(flowers, onItemClick = { flower ->
                                     if (backStack.lastOrNull() is FlowerDetail) {
                                         backStack.removeLastOrNull()
                                     }
                                     // Handle item click here
-                                    val detail = navKey.flowers.first { it.name == flower }
+                                    val detail = flowers.first { it.name == flower }
                                     backStack.add(FlowerDetail(detail))
+                                }, onAddFlower = {
+                                    backStack.add(AddFlower)
                                 })
                             }
                             entry<FlowerDetail>(
                                 metadata = ListDetailSceneStrategy.ListDetail
                             ) { detail ->
                                 FlowerDetailScreen(detail.flower)
+                            }
+                            entry<AddFlower> {
+                                ModalBottomSheet(
+                                    onDismissRequest = {
+                                        backStack.removeLastOrNull()
+                                    },
+                                ) {
+                                    AddFlowerScreen { flower ->
+                                        flowers.add(flower)
+                                    }
+                                }
                             }
                         }
                     )
