@@ -7,16 +7,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.jetpacknav3.models.AppNavBackStack
 import com.example.jetpacknav3.screen.FlowerDetail
 import com.example.jetpacknav3.screen.FlowerDetailScreen
 import com.example.jetpacknav3.screen.FlowerList
@@ -34,7 +39,6 @@ import com.example.jetpacknav3.screen.ProfileScreen
 import com.example.jetpacknav3.ui.theme.JetpackNav3Theme
 import com.example.jetpacknav3.viewmodel.ProfileViewModel
 
-
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +46,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JetpackNav3Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val backStack = rememberNavBackStack(Home)
+                val appBackStack = remember { AppNavBackStack() }
+
+                Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
+                    NavigationBar {
+                        appBackStack.TOP_LEVEL_ROUTE.forEach { route ->
+                            val selected = route == appBackStack.selected
+
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    appBackStack.selectedTopRoute(route)
+                                },
+                                label = {
+                                    Text(text = route.name)
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = route.icon,
+                                        contentDescription = route.name
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }) { innerPadding ->
+                    val backStack = appBackStack.currentRoute
 
                     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
@@ -57,22 +85,19 @@ class MainActivity : ComponentActivity() {
                         ),
                         entryProvider = entryProvider {
                             entry<Home> {
-                                HomeScreen(name = "Android", onClick = {
-                                    backStack.add(Profile)
-                                }, onGotoFlowerList = {
-                                    backStack.add(FlowerList)
-                                })
+                                HomeScreen(name = "Android")
                             }
                             entry<Profile> {
                                 val viewModel: ProfileViewModel = viewModel()
                                 ProfileScreen(
                                     onClickNext = {
-                                        backStack.add(Edit)
+                                        appBackStack.add(Edit)
                                     },
                                     onBack = {
-                                        backStack.removeLastOrNull()
+                                        appBackStack.removeLastOrNull()
                                     },
-                                    viewModel = viewModel)
+                                    viewModel = viewModel
+                                )
                             }
                             entry<Edit> {
                                 EditScreen()
@@ -81,14 +106,14 @@ class MainActivity : ComponentActivity() {
                                 metadata = ListDetailSceneStrategy.ListDetail
                             ) { navKey ->
                                 FlowerListScreen(flowers, onItemClick = { flower ->
-                                    if (backStack.lastOrNull() is FlowerDetail) {
-                                        backStack.removeLastOrNull()
+                                    if (appBackStack.lastOrNull() is FlowerDetail) {
+                                        appBackStack.removeLastOrNull()
                                     }
                                     // Handle item click here
                                     val detail = flowers.first { it.name == flower }
-                                    backStack.add(FlowerDetail(detail))
+                                    appBackStack.add(FlowerDetail(detail))
                                 }, onAddFlower = {
-                                    backStack.add(AddFlower)
+                                    appBackStack.add(AddFlower)
                                 })
                             }
                             entry<FlowerDetail>(
@@ -99,7 +124,7 @@ class MainActivity : ComponentActivity() {
                             entry<AddFlower> {
                                 ModalBottomSheet(
                                     onDismissRequest = {
-                                        backStack.removeLastOrNull()
+                                        appBackStack.removeLastOrNull()
                                     },
                                 ) {
                                     AddFlowerScreen { flower ->
