@@ -28,10 +28,12 @@ By leveraging the `SceneStrategy` API, the app can display two active destinatio
 
 ## TODO & Future Enhancements
 
+- [ ] **Persistent**: Make it survivable through configuration changes and system-initiated process death
 - [ ] **CompositionLocal for Backstack**: Implement a custom `NavEntryDecorator` to provide the backstack via `CompositionLocal`, eliminating prop-drilling for navigation actions in deep hierarchies.
 - [ ] **Synthetic Backstacks for Deep Linking**: Develop a utility to parse incoming URLs/Intents and generate logical backstack sequences (e.g., `[Home, Profile]` instead of just `[Profile]`) to ensure intuitive back navigation.
 - [ ] **Metadata-Driven Transitions**: Utilize the Metadata DSL (anticipated in version 1.1) to define type-safe, declarative animations per `NavKey` type.
 - [ ] **Kotlin Multiplatform (KMP) Readiness**: Move core navigation logic and `NavKey` definitions to a common KMP module to enable shared navigation state across Android, iOS, and Desktop.
+
 
 ## Getting Started
 
